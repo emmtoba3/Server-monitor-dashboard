@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Server Monitor Dashboard</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
 font-family:Arial;
 background:#0f172a;
@@ -30,7 +26,7 @@ margin-bottom:10px;
 
 .subtitle{
 opacity:.8;
-margin-bottom:30px;
+margin-bottom:20px;
 }
 
 .grid{
@@ -88,8 +84,27 @@ padding:10px;
 border-radius:10px;
 }
 
-</style>
+.alert-box{
+padding:16px 20px;
+border-radius:12px;
+font-weight:bold;
+margin-bottom:25px;
+background:#1e293b;
+border-left:6px solid #22c55e;
+}
 
+.alert-ok{
+border-left-color:#22c55e;
+}
+
+.alert-warn{
+border-left-color:#f59e0b;
+}
+
+.alert-danger{
+border-left-color:#ef4444;
+}
+</style>
 </head>
 
 <body>
@@ -98,6 +113,8 @@ border-radius:10px;
 
 <h1>Server Monitor Dashboard</h1>
 <div class="subtitle">Monitoreo del sistema en tiempo real</div>
+
+<div id="alert-box" class="alert-box alert-ok">Sistema estable</div>
 
 <button onclick="loadMetrics()">Actualizar</button>
 
@@ -155,16 +172,28 @@ return"#ef4444"
 }
 
 function updateMetric(idText,idBar,value){
-
 const rounded=Number(value).toFixed(1)
-
 document.getElementById(idText).textContent=`${rounded}%`
-
 const bar=document.getElementById(idBar)
-
 bar.style.width=value+"%"
 bar.style.background=getBarColor(value)
+}
 
+function updateAlert(cpu,ram,disk){
+const alertBox=document.getElementById("alert-box")
+
+alertBox.className="alert-box"
+
+if(cpu>=80 || ram>=85 || disk>=90){
+alertBox.textContent="Alerta crítica: uso alto detectado"
+alertBox.classList.add("alert-danger")
+}else if(cpu>=60 || ram>=70 || disk>=80){
+alertBox.textContent="Advertencia: uso moderado/alto"
+alertBox.classList.add("alert-warn")
+}else{
+alertBox.textContent="Sistema estable"
+alertBox.classList.add("alert-ok")
+}
 }
 
 const cpuData=[]
@@ -173,9 +202,7 @@ const diskData=[]
 const labels=[]
 
 const cpuChart=new Chart(document.getElementById("cpuChart"),{
-
 type:"line",
-
 data:{
 labels:labels,
 datasets:[{
@@ -185,13 +212,10 @@ borderColor:"#22c55e",
 tension:.3
 }]
 }
-
 })
 
 const ramChart=new Chart(document.getElementById("ramChart"),{
-
 type:"line",
-
 data:{
 labels:labels,
 datasets:[{
@@ -201,13 +225,10 @@ borderColor:"#3b82f6",
 tension:.3
 }]
 }
-
 })
 
 const diskChart=new Chart(document.getElementById("diskChart"),{
-
 type:"line",
-
 data:{
 labels:labels,
 datasets:[{
@@ -217,11 +238,9 @@ borderColor:"#f59e0b",
 tension:.3
 }]
 }
-
 })
 
 async function loadMetrics(){
-
 const response=await fetch("/metrics")
 const data=await response.json()
 
@@ -233,6 +252,8 @@ updateMetric("cpu","cpu-bar",data.cpu)
 updateMetric("ram","ram-bar",data.ram)
 updateMetric("disk","disk-bar",data.disk)
 
+updateAlert(data.cpu,data.ram,data.disk)
+
 const time=new Date().toLocaleTimeString()
 
 labels.push(time)
@@ -241,22 +262,18 @@ ramData.push(data.ram)
 diskData.push(data.disk)
 
 if(labels.length>20){
-
 labels.shift()
 cpuData.shift()
 ramData.shift()
 diskData.shift()
-
 }
 
 cpuChart.update()
 ramChart.update()
 diskChart.update()
-
 }
 
 loadMetrics()
-
 setInterval(loadMetrics,3000)
 
 </script>
