@@ -181,7 +181,6 @@ bar.style.background=getBarColor(value)
 
 function updateAlert(cpu,ram,disk){
 const alertBox=document.getElementById("alert-box")
-
 alertBox.className="alert-box"
 
 if(cpu>=80 || ram>=85 || disk>=90){
@@ -196,10 +195,10 @@ alertBox.classList.add("alert-ok")
 }
 }
 
+const labels=[]
 const cpuData=[]
 const ramData=[]
 const diskData=[]
-const labels=[]
 
 const cpuChart=new Chart(document.getElementById("cpuChart"),{
 type:"line",
@@ -211,6 +210,10 @@ data:cpuData,
 borderColor:"#22c55e",
 tension:.3
 }]
+},
+options:{
+responsive:true,
+animation:false
 }
 })
 
@@ -224,6 +227,10 @@ data:ramData,
 borderColor:"#3b82f6",
 tension:.3
 }]
+},
+options:{
+responsive:true,
+animation:false
 }
 })
 
@@ -237,10 +244,39 @@ data:diskData,
 borderColor:"#f59e0b",
 tension:.3
 }]
+},
+options:{
+responsive:true,
+animation:false
 }
 })
 
+function redrawCharts(history){
+labels.length=0
+cpuData.length=0
+ramData.length=0
+diskData.length=0
+
+history.forEach(item=>{
+labels.push(item.timestamp)
+cpuData.push(item.cpu)
+ramData.push(item.ram)
+diskData.push(item.disk)
+})
+
+cpuChart.update()
+ramChart.update()
+diskChart.update()
+}
+
+async function loadHistory(){
+const response=await fetch("/history")
+const history=await response.json()
+redrawCharts(history)
+}
+
 async function loadMetrics(){
+try{
 const response=await fetch("/metrics")
 const data=await response.json()
 
@@ -254,23 +290,10 @@ updateMetric("disk","disk-bar",data.disk)
 
 updateAlert(data.cpu,data.ram,data.disk)
 
-const time=new Date().toLocaleTimeString()
-
-labels.push(time)
-cpuData.push(data.cpu)
-ramData.push(data.ram)
-diskData.push(data.disk)
-
-if(labels.length>20){
-labels.shift()
-cpuData.shift()
-ramData.shift()
-diskData.shift()
+await loadHistory()
+}catch(error){
+console.error("Error loading metrics:",error)
 }
-
-cpuChart.update()
-ramChart.update()
-diskChart.update()
 }
 
 loadMetrics()
