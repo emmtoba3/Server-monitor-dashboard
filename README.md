@@ -1,5 +1,7 @@
 # Server Monitor Dashboard
 
+![Dashboard Preview](dashboard.png)
+
 Aplicación web simple para monitorear métricas básicas del sistema en tiempo real.
 
 ## Funcionalidades
