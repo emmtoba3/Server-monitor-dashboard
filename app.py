@@ -37,7 +37,6 @@ def metrics():
         "ram": psutil.virtual_memory().percent,
         "disk": psutil.disk_usage('/').percent,
         "status": "Activo",
-        "ip": get_local_ip(),
         "uptime": format_uptime(uptime_seconds)
     })
 

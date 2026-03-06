@@ -86,12 +86,7 @@
         <div id="status" class="value">Cargando...</div>
       </div>
 
-      <div class="card">
-        <div class="label">IP local</div>
-        <div id="ip" class="value small">Cargando...</div>
-      </div>
-
-      <div class="card">
+       <div class="card">
         <div class="label">Uptime</div>
         <div id="uptime" class="value">Cargando...</div>
       </div>
@@ -129,8 +124,7 @@
 
       document.getElementById("hostname").textContent = data.hostname;
       document.getElementById("status").textContent = data.status;
-      document.getElementById("ip").textContent = data.ip;
-      document.getElementById("uptime").textContent = data.uptime;
+       document.getElementById("uptime").textContent = data.uptime;
 
       document.getElementById("cpu").textContent = data.cpu + "%";
       document.getElementById("ram").textContent = data.ram + "%";
